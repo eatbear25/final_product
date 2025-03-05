@@ -71,7 +71,7 @@ if ($totalRows) {
       <form class="d-flex" role="search">
         <input class="form-control me-2" type="search"
           name="search" value="<?= $_GET['search'] ?? '' ?>"
-          placeholder="Search" aria-label="Search">
+          placeholder="請輸入商品名稱或介紹" aria-label="Search">
         <button class="btn btn-outline-success" type="submit">Search</button>
       </form>
     </div>

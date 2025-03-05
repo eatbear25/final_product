@@ -35,9 +35,9 @@
           </a>
         </li>
 
-        <button type="button" class="btn btn-success ms-auto" data-bs-toggle="modal" data-bs-target="#addProductModal">
+        <a class="btn btn-success ms-auto" href="add-product.php" role="button">
           + 新增商品
-        </button>
+        </a>
       </ul>
 
     </nav>
@@ -50,7 +50,7 @@
       <thead>
         <tr>
           <th scope="col">#</th>
-          <th scope="col">產品名稱</th>
+          <th scope="col">商品名稱</th>
           <th scope="col">介紹</th>
           <th scope="col">分類</th>
           <th scope="col">庫存</th>
