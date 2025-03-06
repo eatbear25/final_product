@@ -1,14 +1,66 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-TW">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <title><?= empty($title) ? '商品管理' : "$title - 商品管理" ?></title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><?= empty($title) ? '海優斯健康管理平台' : "$title - 海優斯健康管理平台" ?></title>
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+  <!--bootstrap-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <!--bootstrap icon-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+  <!--jquery-->
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css">
+
+  <style>
+    body {
+      display: flex;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .sidebar {
+      height: 100vh;
+      background-color: #f8f9fa;
+      padding: 20px;
+    }
+
+    .sidebar-brand {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .sidebar-nav .nav-link {
+      padding: 10px;
+      color: #333;
+    }
+
+    .list-group-item {
+      border: none;
+    }
+
+    .form-text {
+      color: red;
+      font-weight: bold;
+    }
+
+    .active,
+    .list-group-item.active {
+      background-color: beige !important;
+      border-radius: 10px;
+      color: black !important;
+    }
+
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+      max-height: 100vh;
+      overflow-y: scroll;
+    }
+  </style>
 </head>
 
-<body>
+<body class="bg-white">
