@@ -2,13 +2,18 @@
   <div class="col">
     <nav aria-label="Page navigation example">
       <ul class="pagination">
+        <?php
+        $searchQuery = $search ? "&search=" . urlencode($search) : "";
+        ?>
+
         <li class="page-item">
-          <a class="page-link <?= $page == 1 ? 'disabled' : '' ?>" href="?page=1">
+          <a class="page-link <?= $page == 1 ? 'disabled' : '' ?>" href="?page=1<?= $searchQuery ?>">
             <i class="fa-solid fa-angles-left"></i>
           </a>
         </li>
+
         <li class="page-item">
-          <a class="page-link <?= $page == 1 ? 'disabled' : '' ?>" href="?page=<?= $page - 1 ?>">
+          <a class="page-link <?= $page == 1 ? 'disabled' : '' ?>" href="?page=<?= $page - 1 . $searchQuery ?>">
             <i class="fa-solid fa-angle-left"></i>
           </a>
         </li>
@@ -25,12 +30,13 @@
         endfor; ?>
 
         <li class="page-item">
-          <a class="page-link <?= $page == $totalPages ? 'disabled' : '' ?>" href="?page=<?= $page + 1 ?>">
+          <a class="page-link <?= $page == $totalPages ? 'disabled' : '' ?>" href="?page=<?= $page + 1 . $searchQuery ?>">
             <i class="fa-solid fa-angle-right"></i>
           </a>
         </li>
+
         <li class="page-item">
-          <a class="page-link <?= $page == $totalPages ? 'disabled' : '' ?>" href="?page=<?= $totalPages ?>">
+          <a class="page-link <?= $page == $totalPages ? 'disabled' : '' ?>" href="?page=<?= $totalPages . $searchQuery ?>">
             <i class="fa-solid fa-angles-right"></i>
           </a>
         </li>
@@ -78,8 +84,8 @@
                 <?= $r['status'] == 1 ? '上架' : '下架' ?>
               </button>
             </td>
-            <td><?= $r['image'] ?></td>
-            <!-- <td><img src="./images/<?= $r['image'] ?>" alt="" width="80"></td> -->
+            <!-- <td><?= $r['image'] ?></td> -->
+            <td><img src="./product_images/<?= $r['image'] ?>" alt="" width="80"></td>
             <td><?= date("Y-m-d", strtotime($r['created_at'])) ?></td>
             <td><?= date("Y-m-d", strtotime($r['updated_at'])) ?></td>
             <td>

@@ -8,6 +8,7 @@ $output = [
   'success' => false,
   'postData' => $_POST,
   'error' => '',
+  'file' => '', # 儲存的檔名
   'errorFields' => []
 ];
 
@@ -17,10 +18,46 @@ $content = trim($_POST['content'] ?? '');
 $category_id = $_POST['category'] ?? null;
 $stock = $_POST['stock'] ?? null;
 $price = $_POST['price'] ?? null;
-$status = isset($_POST['status']) ? (int)$_POST['status'] : 0;
+$status = isset($_POST['status']) ? (int)$_POST['status'] : 1;
+
+$dir = __DIR__ . '/product_images/';
 
 // * 欄位的資料檢查
 $isPass = true;
+
+// * 圖片驗證
+# 1.篩選可上傳的檔案類型, 2.決定副檔名
+$extMap = [
+  'image/jpeg' => '.jpg',
+  'image/png' => '.png',
+  'image/webp' => '.webp',
+];
+
+if (empty($_FILES['avatar'])) {
+  # avatar 欄位沒有上傳檔案
+  echo json_encode($output);
+  exit;
+}
+if (! is_string($_FILES['avatar']['name'])) {
+  # 必須只上傳一個檔案
+  $output['code'] = 401;
+  echo json_encode($output);
+  exit;
+}
+
+if ($_FILES['avatar']['error'] != 0) {
+  # 上傳過程發生錯誤
+  $output['code'] = 405;
+  echo json_encode($output);
+  exit;
+}
+
+if (empty($extMap[$_FILES['avatar']['type']])) {
+  # 上傳的檔案不符合要求的類型
+  $output['code'] = 407;
+  echo json_encode($output);
+  exit;
+}
 
 // 產品名稱驗證
 if (empty($name)) {
@@ -36,9 +73,9 @@ if (empty($category_id)) {
   $output['errorFields']['category'] = '商品分類為必填欄位';
 }
 
-if (empty($status)) {
+if (!isset($status)) {
   $isPass = false;
-  $output['errorFields']['status'] = '商品分類為必填欄位';
+  $output['errorFields']['status'] = '商品狀態為必填欄位';
 }
 
 // 庫存驗證
@@ -58,30 +95,43 @@ if (! $isPass) {
   exit;
 }
 
+$ext = $extMap[$_FILES['avatar']['type']]; # 對應到的副檔
+$file = md5($_FILES['avatar']['name'] . uniqid()) . $ext;
+$output['file'] = $file;
 
-// $sql = "INSERT INTO `product` (
-//     `name`, `content`, `product_category_id`, `stock`, `price`, `status`
-//     ) VALUES (
-//       ?,
-//       ?,
-//       ?,
-//       ?,
-//       ?,
-//       -- `image` ?,
-//       ?
-//     )";
+try {
+  $output['success'] = move_uploaded_file(
+    $_FILES['avatar']['tmp_name'],
+    $dir .  $file
+  );
+} catch (Exception $ex) {
+  $output['error'] = $ex->getMessage();
+}
+
+
+$sql = "INSERT INTO `product` (
+    `name`, `content`, `product_category_id`, `stock`, `price`, `status`, `image`
+    ) VALUES (
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?,
+      ?
+    )";
 
 // * 這邊是沒有圖片的
-$sql = "INSERT INTO `product` (
-  `name`, `content`, `product_category_id`, `stock`, `price`, `status`
-  ) VALUES (
-    ?,
-    ?,
-    ?,
-    ?,
-    ?,
-    ?
-  )";
+// $sql = "INSERT INTO `product` (
+//   `name`, `content`, `product_category_id`, `stock`, `price`, `status`
+//   ) VALUES (
+//     ?,
+//     ?,
+//     ?,
+//     ?,
+//     ?,
+//     ?
+//   )";
 
 try {
   $stmt = $pdo->prepare($sql);
@@ -91,8 +141,8 @@ try {
     $category_id,
     $stock,
     $price,
-    $status
-    // $image_name // ✅ 把圖片檔名存入資料庫
+    $status,
+    $file
   ]);
 
   # $stmt->rowCount() 影響的列數, 新增的話就是新增幾筆

@@ -101,7 +101,7 @@ if ($totalRows) {
   const deleteOne = id => {
     // question: 1. 若要在詢問時呈現名字? 2. 點選後在詢問時整列要呈現明顯的底色
     if (confirm(`確定要刪除編號為 ${id} 的資料嗎?`)) {
-      location.href = `del.php?id=${id}`;
+      location.href = `del-product.php?id=${id}`;
     }
   }
 </script>

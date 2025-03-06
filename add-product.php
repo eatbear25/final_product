@@ -37,12 +37,13 @@ try {
           <h5 class="card-title mb-4">新增商品</h5>
           <form class="needs-validation" name="addProductForm" novalidate onsubmit="sendData(event)">
             <!-- TODO: 處理照片 -->
-            <!-- <div class="mb-3 col-7">
-              <label for="image" class="form-label">商品照片</label>
-              <input class="form-control" type="file" name="image" accept="image/png,image/jpeg" />
-              <div class="form-text"></div>
+            <div class="mb-3 col-7">
+              <label for="avatar" class="form-label">商品照片</label>
+              <input class="form-control" type="file" name="avatar" accept="image/png,image/jpeg" />
               <br />
-            </div> -->
+              <img src="" alt="" id="preview" width="300" />
+              <br />
+            </div>
 
             <div class="mb-3 col-7">
               <label for="name" class="form-label"><span class="label-required">*</span> 商品名稱</label>
@@ -136,6 +137,19 @@ try {
   // 建立對應到 DOM 的 Modal 物件
   const addResultModal = new bootstrap.Modal('#addResultModal');
 
+  // * 處理圖片
+  const avatar = document.addProductForm.avatar;
+  const preview = document.querySelector("#preview");
+
+  avatar.addEventListener("change", (e) => {
+    if (avatar.files.length) {
+      // 同步的方式載入檔案的內容預覽
+      preview.src = URL.createObjectURL(avatar.files[0]);
+    } else {
+      preview.src = "";
+    }
+  });
+
   // Bootstrap 驗證區
   (function() {
     'use strict'
@@ -187,11 +201,12 @@ try {
         })
     }
 
+    // * 新增成功後，modal 關閉會刷新表單內容
     document.querySelector('#addResultModal').addEventListener('hidden.bs.modal', function() {
       document.addProductForm.reset(); // 清空表單
       document.addProductForm.classList.remove('was-validated'); // 移除 Bootstrap 驗證標記
+      preview.src = "";
     });
-
   }
 </script>
 <?php include __DIR__ . '/parts/html-tail.php' ?>
