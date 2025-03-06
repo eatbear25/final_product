@@ -95,6 +95,7 @@ if (! $isPass) {
   exit;
 }
 
+// * 確認圖片沒問題，就搬運檔案到指定資料夾
 $ext = $extMap[$_FILES['avatar']['type']]; # 對應到的副檔
 $file = md5($_FILES['avatar']['name'] . uniqid()) . $ext;
 $output['file'] = $file;
