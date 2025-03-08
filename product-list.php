@@ -195,7 +195,6 @@ if ($totalRows) {
 
 <?php include __DIR__ . '/parts/html-scripts.php' ?>
 
-<script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
 <script>
   const $_GET = <?= json_encode($_GET) ?>; // 生頁面時, 直接把資料放到 JS
   const search = $_GET.search;
@@ -212,6 +211,60 @@ if ($totalRows) {
       location.href = `del-product.php?id=${id}`;
     }
   }
+
+  // * 批次刪除
+  const batchDeleteBtn = document.getElementById("batchDeleteBtn");
+  const checkboxes = document.querySelectorAll(".delete-checkbox");
+  const selectAllCheckbox = document.getElementById("selectAll");
+
+  // 監聽「全選」按鈕
+  selectAllCheckbox.addEventListener("change", function() {
+    checkboxes.forEach(cb => cb.checked = this.checked);
+  });
+
+  // 監聽所有單選 checkbox，如果有取消選取則「全選」要取消
+  checkboxes.forEach(cb => {
+    cb.addEventListener("change", function() {
+      selectAllCheckbox.checked = Array.from(checkboxes).every(cb => cb.checked);
+    });
+  });
+
+  // 點擊「刪除多筆」按鈕
+  batchDeleteBtn.addEventListener("click", function() {
+    let selectedIds = Array.from(checkboxes)
+      .filter(cb => cb.checked) // 只取被勾選的 checkbox
+      .map(cb => cb.value); // 取出 value (商品 ID)
+
+    if (selectedIds.length === 0) {
+      alert("請選擇要刪除的商品！");
+      return;
+    }
+
+    if (!confirm(`確定要刪除這 ${selectedIds.length} 個商品嗎？`)) {
+      return;
+    }
+
+    // 送出 AJAX 請求
+    fetch("del-products.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          ids: selectedIds
+        })
+      })
+      .then(response => response.json())
+      .then(result => {
+        if (result.success) {
+          alert("刪除成功！");
+          location.reload(); // 重新整理頁面
+        } else {
+          alert("刪除失敗：" + result.error);
+        }
+      })
+      .catch(error => console.error("批次刪除錯誤:", error));
+  });
 </script>
 
 <?php include __DIR__ . '/parts/html-tail.php' ?>

@@ -14,7 +14,7 @@ if (!isset($next_order)) {
 <!-- 新增以及商品管理 -->
 <div class="row mb-4 g-0">
   <div class="col-11">
-    <button type="submit" class="btn btn-danger">批次刪除</button>
+    <button type="button" class="btn btn-danger" id="batchDeleteBtn"><i class="fa-solid fa-trash pe-2"></i>刪除多筆</button>
   </div>
 
   <div class="col-1">
@@ -48,7 +48,7 @@ if (!isset($next_order)) {
         <?php foreach ($rows as $r): ?>
           <tr>
             <td class="text-center">
-              <input class="form-check-input" type="checkbox" name="product_delete_id[]" value="<?= $r['id'] ?>">
+              <input class="form-check-input delete-checkbox" type="checkbox" name="product_delete_id[]" value="<?= $r['id'] ?>">
             </td>
             <td class="text-center"><?= $r['id'] ?></td>
             <td><?= $r['name'] ?></td>
