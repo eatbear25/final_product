@@ -17,7 +17,6 @@ $search = $_GET['search'] ?? '';
 
 if ($search) {
   $search_esc = $pdo->quote("%{$search}%"); # 避免 SQL injection
-  // $where .= " AND (`name` LIKE $search_esc OR `content` LIKE $search_esc ) ";
   $where .= " AND (product.name LIKE $search_esc OR product.content LIKE $search_esc ) ";
 }
 
@@ -44,27 +43,6 @@ $sort_icons = [
   'DESC' => '<i class="fas fa-sort-down"></i>'
 ];
 
-// 原本的
-// if ($totalRows) {
-//   # 計算總頁數
-//   $totalPages = ceil($totalRows / $perPage);
-
-//   if ($page > $totalPages) {
-//     header("Location: ?page={$totalPages}"); # 跳到最後一頁
-//     exit;
-//   }
-//   # 取得該頁面的資料
-//   $sql = sprintf("SELECT * FROM `product`
-//                 %s
-//                 ORDER BY id DESC 
-//                 LIMIT %s, %s ", $where, ($page - 1) * $perPage, $perPage);
-//   try {
-//     $rows = $pdo->query($sql)->fetchAll();
-//   } catch (PDOException $ex) {
-//     echo '<h1>' . $ex->getMessage() . '</h1>';
-//     echo '<h2>' . $ex->getCode() . '</h2>';
-//   }
-// }
 
 if ($totalRows) {
   # 計算總頁數
@@ -74,19 +52,6 @@ if ($totalRows) {
     header("Location: ?page={$totalPages}");
     exit;
   }
-
-  // 取得該頁面的資料，加入排序
-  // 原本的
-  // $sql = sprintf(
-  //   "SELECT * FROM `product` %s 
-  //   ORDER BY %s %s 
-  //   LIMIT %s, %s",
-  //   $where,
-  //   $column,
-  //   $order,
-  //   ($page - 1) * $perPage,
-  //   $perPage
-  // );
 
   // 取得該頁面的資料，並加入 JOIN
   $sql = sprintf(
@@ -121,7 +86,6 @@ if ($totalRows) {
 
   th a {
     text-decoration: none;
-    /* color: #228be6; */
     font-weight: bold;
   }
 
@@ -134,6 +98,10 @@ if ($totalRows) {
     transform: scale(1.3);
     border: 1px solid #999;
     cursor: pointer;
+  }
+
+  thead {
+    height: 60px;
   }
 
   table td,
@@ -212,6 +180,16 @@ if ($totalRows) {
     }
   }
 
+  // 變更表格行的背景顏色
+  function toggleRowHighlight(checkbox) {
+    let row = checkbox.closest("tr");
+    if (checkbox.checked) {
+      row.classList.add("table-danger");
+    } else {
+      row.classList.remove("table-danger");
+    }
+  }
+
   // * 批次刪除
   const batchDeleteBtn = document.getElementById("batchDeleteBtn");
   const checkboxes = document.querySelectorAll(".delete-checkbox");
@@ -219,15 +197,21 @@ if ($totalRows) {
 
   // 監聽「全選」按鈕
   selectAllCheckbox.addEventListener("change", function() {
-    checkboxes.forEach(cb => cb.checked = this.checked);
+    checkboxes.forEach(cb => {
+      cb.checked = this.checked;
+      toggleRowHighlight(cb);
+    });
   });
 
   // 監聽所有單選 checkbox，如果有取消選取則「全選」要取消
   checkboxes.forEach(cb => {
     cb.addEventListener("change", function() {
       selectAllCheckbox.checked = Array.from(checkboxes).every(cb => cb.checked);
+      toggleRowHighlight(cb);
     });
   });
+
+
 
   // 點擊「刪除多筆」按鈕
   batchDeleteBtn.addEventListener("click", function() {

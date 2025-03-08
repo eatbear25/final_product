@@ -42,12 +42,12 @@ try {
 
   .breadcrumb-item a {
     text-decoration: none;
-    /* color: #444; */
   }
 
   h5 {
     border-bottom: 3px solid #339af0;
     padding-bottom: 16px;
+    color: #333;
   }
 </style>
 

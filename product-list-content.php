@@ -14,7 +14,7 @@ if (!isset($next_order)) {
 <!-- 新增以及商品管理 -->
 <div class="row mb-4 g-0">
   <div class="col-11">
-    <button type="button" class="btn btn-danger" id="batchDeleteBtn"><i class="fa-solid fa-trash pe-2"></i>刪除多筆</button>
+    <button type="button" class="btn btn-danger" id="batchDeleteBtn"><i class="fa-solid fa-trash pe-2"></i>刪除所選</button>
   </div>
 
   <div class="col-1">
@@ -24,8 +24,8 @@ if (!isset($next_order)) {
 
 <div class="row mb-3">
   <div class="col">
-    <table class="table table-striped table-bordered">
-      <thead>
+    <table class="table table-bordered table-hover">
+      <thead class="table-light">
         <tr>
           <th style="width: 40px " class="text-center">
             <input class="form-check-input" type="checkbox" id="selectAll">
