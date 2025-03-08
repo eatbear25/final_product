@@ -17,7 +17,8 @@ $search = $_GET['search'] ?? '';
 
 if ($search) {
   $search_esc = $pdo->quote("%{$search}%"); # 避免 SQL injection
-  $where .= " AND (`name` LIKE $search_esc OR `content` LIKE $search_esc ) ";
+  // $where .= " AND (`name` LIKE $search_esc OR `content` LIKE $search_esc ) ";
+  $where .= " AND (product.name LIKE $search_esc OR product.content LIKE $search_esc ) ";
 }
 
 
@@ -75,10 +76,26 @@ if ($totalRows) {
   }
 
   // 取得該頁面的資料，加入排序
+  // 原本的
+  // $sql = sprintf(
+  //   "SELECT * FROM `product` %s 
+  //   ORDER BY %s %s 
+  //   LIMIT %s, %s",
+  //   $where,
+  //   $column,
+  //   $order,
+  //   ($page - 1) * $perPage,
+  //   $perPage
+  // );
+
+  // 取得該頁面的資料，並加入 JOIN
   $sql = sprintf(
-    "SELECT * FROM `product` %s 
-    ORDER BY %s %s 
-    LIMIT %s, %s",
+    " SELECT product.*, product_category.name AS category_name
+      FROM product
+      INNER JOIN product_category ON product.product_category_id = product_category.id
+      %s
+      ORDER BY %s %s
+      LIMIT %s, %s",
     $where,
     $column,
     $order,
@@ -104,31 +121,68 @@ if ($totalRows) {
 
   th a {
     text-decoration: none;
-    color: #228be6;
+    /* color: #228be6; */
     font-weight: bold;
   }
 
   tr .highlight {
     background-color: #f9fafb;
   }
+
+
+  input[type="checkbox"] {
+    transform: scale(1.3);
+    border: 1px solid #999;
+    cursor: pointer;
+  }
+
+  table td,
+  table th {
+    vertical-align: middle;
+  }
 </style>
 
 <?php include __DIR__ . '/parts/html-sidebar.php' ?>
-<div class="container">
-  <div class="row">
-    <div class="col-8"></div>
 
-    <div class="col-4 mb-4">
-      <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search"
-          name="search" value="<?= $_GET['search'] ?? '' ?>"
-          placeholder="請輸入商品名稱或介紹" aria-label="Search">
-        <button class="btn btn-outline-success" type="submit">Search</button>
-      </form>
-      <a href="<?= $_SERVER['PHP_SELF'] ?>" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-rotate-right"></i></a>
+<div class="container">
+  <!-- 麵包屑 -->
+  <div class="row">
+    <div class="col py-4">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="#">
+              <i class="fa-solid fa-house"></i>
+            </a>
+          </li>
+          <li class="breadcrumb-item" aria-current="page">商品管理</li>
+        </ol>
+      </nav>
     </div>
   </div>
 
+  <div class="row">
+    <div class="col-8">
+      <span class="fw-bold">全部商品</span> (<?= $totalRows ?>)
+    </div>
+
+    <!-- 搜尋 -->
+    <div class="col-4 mb-3">
+      <form class="d-flex" role="search">
+        <input class="form-control" type="search"
+          name="search" value="<?= $_GET['search'] ?? '' ?>"
+          placeholder="請輸入商品名稱或介紹" aria-label="Search">
+        <button class="btn btn-outline-success me-3" type="submit">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+        <a href="<?= $_SERVER['PHP_SELF'] ?>" class="btn btn-outline-secondary">
+          <i class="fa-solid fa-arrow-rotate-right"></i>
+        </a>
+      </form>
+    </div>
+  </div>
+
+  <!-- 表格內容 -->
   <?php
   if (empty($rows)) {
     include __DIR__ . '/product-list-no-data.php';
@@ -138,6 +192,7 @@ if ($totalRows) {
   ?>
 
 </div>
+
 <?php include __DIR__ . '/parts/html-scripts.php' ?>
 
 <script src="https://cdn.datatables.net/2.2.2/js/dataTables.js"></script>
