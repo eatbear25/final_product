@@ -266,13 +266,14 @@ try {
           console.warn(ex);
         })
     }
-
-    // * 新增成功後，modal 關閉會刷新表單內容
-    document.querySelector('#addResultModal').addEventListener('hidden.bs.modal', function() {
-      document.addProductForm.reset(); // 清空表單
-      document.addProductForm.classList.remove('was-validated'); // 移除 Bootstrap 驗證標記
-      preview.src = "";
-    });
   }
+
+  // * 新增成功後，modal 關閉會刷新表單內容
+  document.querySelector('#addResultModal').addEventListener('hidden.bs.modal', function() {
+    document.addProductForm.reset(); // 清空表單
+    document.addProductForm.classList.remove('was-validated'); // 移除 Bootstrap 驗證標記
+    preview.src = "";
+    uploadText.style.display = 'block';
+  });
 </script>
 <?php include __DIR__ . '/parts/html-tail.php' ?>
