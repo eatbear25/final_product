@@ -9,6 +9,9 @@ if (!isset($order)) {
 if (!isset($next_order)) {
   $next_order = 'desc';
 }
+
+// 組合 search 參數
+$searchQuery = $search ? "&search=" . urlencode($search) : "";
 ?>
 
 <!-- 新增以及商品管理 -->
@@ -30,15 +33,32 @@ if (!isset($next_order)) {
           <th style="width: 40px " class="text-center">
             <input class="form-check-input" type="checkbox" id="selectAll">
           </th>
-          <th style="width: 50px"><a href="?page=<?= $page ?>&column=id&order=<?= $next_order ?>">編號 <?= $column == 'id' ? $sort_icons[$order] : '' ?></a></th>
+
+          <th style="width: 50px">
+            <a href="?page=<?= $page ?>&column=id&order=<?= $next_order ?><?= $searchQuery ?>">
+              編號 <?= $column == 'id' ? $sort_icons[$order] : '' ?>
+            </a>
+          </th>
           <th style="width: 100px">商品名稱</th>
           <th style="width: 200px">介紹</th>
           <th style="width: 70px">分類</th>
-          <th style="width: 60px"><a href="?page=<?= $page ?>&column=stock&order=<?= $next_order ?>">庫存 <?= $column == 'stock' ? $sort_icons[$order] : '' ?></a></th>
-          <th style="width: 60px"><a href="?page=<?= $page ?>&column=price&order=<?= $next_order ?>">價格 <?= $column == 'price' ? $sort_icons[$order] : '' ?></a></th>
+          <th style="width: 60px">
+            <a href="?page=<?= $page ?>&column=stock&order=<?= $next_order ?><?= $searchQuery ?>">
+              庫存 <?= $column == 'stock' ? $sort_icons[$order] : '' ?>
+            </a>
+          </th>
+          <th style="width: 60px">
+            <a href="?page=<?= $page ?>&column=price&order=<?= $next_order ?><?= $searchQuery ?>">
+              價格 <?= $column == 'price' ? $sort_icons[$order] : '' ?>
+            </a>
+          </th>
           <th style="width: 70px">商品狀態</th>
           <th style="width: 80px">照片</th>
-          <th style="width: 80px"><a href="?page=<?= $page ?>&column=created_at&order=<?= $next_order ?>">上架時間 <?= $column == 'created_at' ? $sort_icons[$order] : '' ?></a></th>
+          <th style="width: 80px">
+            <a href="?page=<?= $page ?>&column=created_at&order=<?= $next_order ?><?= $searchQuery ?>">
+              上架時間 <?= $column == 'created_at' ? $sort_icons[$order] : '' ?>
+            </a>
+          </th>
           <!-- <th><a href="?page=<?= $page ?>&column=updated_at&order=<?= $next_order ?>">更新時間 <?= $column == 'updated_at' ? $sort_icons[$order] : '' ?></a></th> -->
           <th style="width: 100px">操作</th>
         </tr>
