@@ -14,10 +14,23 @@ if ($page < 1) {
 $where = ' WHERE 1 '; # SQL 條件的開頭
 
 $search = $_GET['search'] ?? '';
+$filter_status = $_GET['status'] ?? ''; // 商品狀態篩選
+$filter_category = $_GET['category'] ?? ''; // 商品分類篩選
 
+// 搜尋條件
 if ($search) {
-  $search_esc = $pdo->quote("%{$search}%"); # 避免 SQL injection
-  $where .= " AND (product.name LIKE $search_esc OR product.content LIKE $search_esc ) ";
+  $search_esc = $pdo->quote("%{$search}%");
+  $where .= " AND (product.name LIKE $search_esc OR product.content LIKE $search_esc) ";
+}
+
+// 商品狀態篩選（1=上架, 0=下架）
+if ($filter_status !== '') {
+  $where .= " AND product.status = " . intval($filter_status);
+}
+
+// 商品分類篩選
+if ($filter_category !== '') {
+  $where .= " AND product.product_category_id = " . intval($filter_category);
 }
 
 
@@ -130,25 +143,17 @@ if ($totalRows) {
   </div>
 
   <div class="row">
-    <div class="col-8">
+    <div class="col-11">
       <span class="fw-bold">全部商品</span> (<?= $totalRows ?>)
     </div>
 
     <!-- 搜尋 -->
-    <div class="col-4 mb-3">
-      <form class="d-flex" role="search">
-        <input class="form-control" type="search"
-          name="search" value="<?= $_GET['search'] ?? '' ?>"
-          placeholder="請輸入商品名稱或介紹" aria-label="Search">
-        <button class="btn btn-outline-success me-3" type="submit">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
-        <a href="<?= $_SERVER['PHP_SELF'] ?>" class="btn btn-outline-secondary">
-          <i class="fa-solid fa-arrow-rotate-right"></i>
-        </a>
-      </form>
+    <div class="col-1 mb-3 g-0">
+      <a class="btn btn-success d-inline-block" href="add-product.php" role="button">+ 新增商品</a>
     </div>
   </div>
+
+
 
   <!-- 表格內容 -->
   <?php
@@ -164,21 +169,23 @@ if ($totalRows) {
 <?php include __DIR__ . '/parts/html-scripts.php' ?>
 
 <script>
-  const $_GET = <?= json_encode($_GET) ?>; // 生頁面時, 直接把資料放到 JS
+  const $_GET = <?= json_encode($_GET) ?>; // 將 GET 參數轉為 JS 變數
   const search = $_GET.search;
+
   if (search) {
     const searchFields = document.querySelectorAll('.search-field');
-    for (let td of searchFields) {
-      td.innerHTML = td.innerHTML.split(search).join(`<b>${search}</b>`)
-    }
+    searchFields.forEach(td => {
+      const regex = new RegExp(search, 'gi'); // gi：不區分大小寫
+      td.textContent = td.textContent.replace(regex, match => `**${match}**`); // 使用 textContent 避免 XSS
+    });
   }
 
+  // 單筆刪除
   const deleteOne = id => {
-    // question: 1. 若要在詢問時呈現名字? 2. 點選後在詢問時整列要呈現明顯的底色
     if (confirm(`確定要刪除編號為 ${id} 的資料嗎?`)) {
       location.href = `del-product.php?id=${id}`;
     }
-  }
+  };
 
   // 變更表格行的背景顏色
   function toggleRowHighlight(checkbox) {
@@ -190,34 +197,21 @@ if ($totalRows) {
     }
   }
 
-  // * 批次刪除
+  // **批次刪除**
   const batchDeleteBtn = document.getElementById("batchDeleteBtn");
   const checkboxes = document.querySelectorAll(".delete-checkbox");
   const selectAllCheckbox = document.getElementById("selectAll");
 
-  // 監聽「全選」按鈕
-  selectAllCheckbox.addEventListener("change", function() {
-    checkboxes.forEach(cb => {
-      cb.checked = this.checked;
-      toggleRowHighlight(cb);
-    });
-  });
+  // **確保不重複綁定批量刪除事件**
+  if (batchDeleteBtn && checkboxes.length > 0) {
+    batchDeleteBtn.removeEventListener("click", handleBatchDelete);
+    batchDeleteBtn.addEventListener("click", handleBatchDelete);
+  }
 
-  // 監聽所有單選 checkbox，如果有取消選取則「全選」要取消
-  checkboxes.forEach(cb => {
-    cb.addEventListener("change", function() {
-      selectAllCheckbox.checked = Array.from(checkboxes).every(cb => cb.checked);
-      toggleRowHighlight(cb);
-    });
-  });
-
-
-
-  // 點擊「刪除多筆」按鈕
-  batchDeleteBtn.addEventListener("click", function() {
+  function handleBatchDelete() {
     let selectedIds = Array.from(checkboxes)
-      .filter(cb => cb.checked) // 只取被勾選的 checkbox
-      .map(cb => cb.value); // 取出 value (商品 ID)
+      .filter(cb => cb.checked)
+      .map(cb => cb.value);
 
     if (selectedIds.length === 0) {
       alert("請選擇要刪除的商品！");
@@ -228,7 +222,6 @@ if ($totalRows) {
       return;
     }
 
-    // 送出 AJAX 請求
     fetch("del-products.php", {
         method: "POST",
         headers: {
@@ -242,12 +235,30 @@ if ($totalRows) {
       .then(result => {
         if (result.success) {
           alert("刪除成功！");
-          location.reload(); // 重新整理頁面
+          location.reload();
         } else {
           alert("刪除失敗：" + result.error);
         }
       })
       .catch(error => console.error("批次刪除錯誤:", error));
+  }
+
+  // **監聽「全選」按鈕**
+  if (selectAllCheckbox) {
+    selectAllCheckbox.addEventListener("change", function() {
+      checkboxes.forEach(cb => {
+        cb.checked = this.checked;
+        toggleRowHighlight(cb);
+      });
+    });
+  }
+
+  // **監聽所有單選 checkbox**
+  checkboxes.forEach(cb => {
+    cb.addEventListener("change", function() {
+      selectAllCheckbox.checked = Array.from(checkboxes).every(cb => cb.checked);
+      toggleRowHighlight(cb);
+    });
   });
 </script>
 

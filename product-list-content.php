@@ -10,19 +10,70 @@ if (!isset($next_order)) {
   $next_order = 'desc';
 }
 
-// 組合 search 參數
 $searchQuery = $search ? "&search=" . urlencode($search) : "";
+$statusQuery = $filter_status !== '' ? "&status=" . intval($filter_status) : "";
+$categoryQuery = $filter_category !== '' ? "&category=" . intval($filter_category) : "";
+$extraQuery = $searchQuery . $statusQuery . $categoryQuery;
 ?>
+
 
 <!-- 新增以及商品管理 -->
 <div class="row mb-4 g-0">
-  <div class="col-11">
+  <!-- 刪除所選 -->
+  <div class="col-2">
     <button type="button" class="btn btn-danger" id="batchDeleteBtn"><i class="fa-solid fa-trash pe-2"></i>刪除所選</button>
   </div>
 
-  <div class="col-1">
-    <a class="btn btn-success d-inline-block" href="add-product.php" role="button">+ 新增商品</a>
+  <!-- 篩選框 -->
+  <div class="col-6">
+    <form class="d-flex" method="GET">
+      <!-- 商品狀態篩選 -->
+      <select class="form-select me-2" name="status" style="width: 180px; max-width: 100%;">
+        <option value="" <?= $filter_status === '' ? 'selected' : '' ?>>商品狀態</option>
+        <option value="1" <?= $filter_status === '1' ? 'selected' : '' ?>>上架</option>
+        <option value="0" <?= $filter_status === '0' ? 'selected' : '' ?>>下架</option>
+      </select>
+
+      <!-- 商品分類篩選 -->
+      <select class="form-select me-2" name="category" style="width: 220px; max-width: 100%;">
+        <option value="" <?= $filter_category === '' ? 'selected' : '' ?>>商品分類</option>
+        <?php
+        $cat_sql = "SELECT id, name FROM product_category";
+        $categories = $pdo->query($cat_sql)->fetchAll();
+        foreach ($categories as $cat) :
+        ?>
+          <option value="<?= $cat['id'] ?>" <?= $filter_category == $cat['id'] ? 'selected' : '' ?>>
+            <?= $cat['name'] ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
+
+      <button class="btn btn-outline-success me-2" type="submit">
+        <i class="fa-solid fa-filter"></i> 篩選
+      </button>
+
+      <a href="?page=1" class="btn btn-outline-secondary">
+        <i class="fa-solid fa-arrow-rotate-right"></i> 清除
+      </a>
+    </form>
   </div>
+
+  <!-- 搜尋框 -->
+  <div class="col-4">
+    <form class="d-flex" role="search" method="GET">
+      <input class="form-control me-2" type="search" name="search"
+        value="<?= htmlspecialchars($_GET['search'] ?? '') ?>" placeholder="請輸入商品名稱或介紹">
+
+      <!-- 隱藏篩選條件，確保搜尋時不會清空篩選 -->
+      <input type="hidden" name="status" value="<?= htmlspecialchars($filter_status) ?>">
+      <input type="hidden" name="category" value="<?= htmlspecialchars($filter_category) ?>">
+
+      <button class="btn btn-outline-success" type="submit">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </button>
+    </form>
+  </div>
+
 </div>
 
 <div class="row mb-3">
@@ -33,9 +84,8 @@ $searchQuery = $search ? "&search=" . urlencode($search) : "";
           <th style="width: 40px " class="text-center">
             <input class="form-check-input" type="checkbox" id="selectAll">
           </th>
-
           <th style="width: 50px">
-            <a href="?page=<?= $page ?>&column=id&order=<?= $next_order ?><?= $searchQuery ?>">
+            <a href="?page=<?= $page ?>&column=id&order=<?= $next_order ?><?= $extraQuery ?>">
               編號 <?= $column == 'id' ? $sort_icons[$order] : '' ?>
             </a>
           </th>
@@ -43,19 +93,19 @@ $searchQuery = $search ? "&search=" . urlencode($search) : "";
           <th style="width: 200px">介紹</th>
           <th style="width: 70px">分類</th>
           <th style="width: 60px">
-            <a href="?page=<?= $page ?>&column=stock&order=<?= $next_order ?><?= $searchQuery ?>">
+            <a href="?page=<?= $page ?>&column=stock&order=<?= $next_order ?><?= $extraQuery ?>">
               庫存 <?= $column == 'stock' ? $sort_icons[$order] : '' ?>
             </a>
           </th>
           <th style="width: 60px">
-            <a href="?page=<?= $page ?>&column=price&order=<?= $next_order ?><?= $searchQuery ?>">
+            <a href="?page=<?= $page ?>&column=price&order=<?= $next_order ?><?= $extraQuery ?>">
               價格 <?= $column == 'price' ? $sort_icons[$order] : '' ?>
             </a>
           </th>
           <th style="width: 70px">商品狀態</th>
           <th style="width: 80px">照片</th>
           <th style="width: 80px">
-            <a href="?page=<?= $page ?>&column=created_at&order=<?= $next_order ?><?= $searchQuery ?>">
+            <a href="?page=<?= $page ?>&column=created_at&order=<?= $next_order ?><?= $extraQuery ?>">
               上架時間 <?= $column == 'created_at' ? $sort_icons[$order] : '' ?>
             </a>
           </th>
@@ -100,38 +150,54 @@ $searchQuery = $search ? "&search=" . urlencode($search) : "";
   <div class="col">
     <nav aria-label="Page navigation example">
       <ul class="pagination justify-content-center">
-        <?php $searchQuery = $search ? "&search=" . urlencode($search) : ""; ?>
+        <?php
+        $searchQuery = $search ? "&search=" . urlencode($search) : "";
+        $statusQuery = $filter_status !== '' ? "&status=" . intval($filter_status) : "";
+        $categoryQuery = $filter_category !== '' ? "&category=" . intval($filter_category) : "";
+        $extraQuery = $searchQuery . $statusQuery . $categoryQuery;
+        ?>
+
+        <!-- 第一頁 -->
         <li class="page-item">
-          <a class="page-link <?= $page == 1 ? 'disabled' : '' ?>" href="?page=1<?= $searchQuery ?>&column=<?= $column ?>&order=<?= $order ?>">
+          <a class="page-link <?= $page == 1 ? 'disabled' : '' ?>" href="?page=1<?= $extraQuery ?>&column=<?= $column ?>&order=<?= $order ?>">
             <i class="fa-solid fa-angles-left"></i>
           </a>
         </li>
+
+        <!-- 上一頁 -->
         <li class="page-item">
-          <a class="page-link <?= $page == 1 ? 'disabled' : '' ?>" href="?page=<?= $page - 1 . $searchQuery ?>&column=<?= $column ?>&order=<?= $order ?>">
+          <a class="page-link <?= $page == 1 ? 'disabled' : '' ?>" href="?page=<?= $page - 1 ?><?= $extraQuery ?>&column=<?= $column ?>&order=<?= $order ?>">
             <i class="fa-solid fa-angle-left"></i>
           </a>
         </li>
+
+        <!-- 中間頁碼 -->
         <?php for ($i = $page - 5; $i <= $page + 5; $i++):
           if ($i >= 1 && $i <= $totalPages):
             $qs = $_GET;
             $qs['page'] = $i;
+            $qs['column'] = $column;
+            $qs['order'] = $order;
         ?>
             <li class="page-item <?= $i == $page ? 'active' : '' ?>">
               <a class="page-link" href="?<?= http_build_query($qs) ?>"><?= $i ?></a>
             </li>
         <?php endif;
         endfor; ?>
+
+        <!-- 下一頁 -->
         <li class="page-item">
-          <a class="page-link <?= $page == $totalPages ? 'disabled' : '' ?>" href="?page=<?= $page + 1 . $searchQuery ?>&column=<?= $column ?>&order=<?= $order ?>">
+          <a class="page-link <?= $page == $totalPages ? 'disabled' : '' ?>" href="?page=<?= $page + 1 ?><?= $extraQuery ?>&column=<?= $column ?>&order=<?= $order ?>">
             <i class="fa-solid fa-angle-right"></i>
           </a>
         </li>
+
+        <!-- 最後一頁 -->
         <li class="page-item">
-          <a class="page-link <?= $page == $totalPages ? 'disabled' : '' ?>" href="?page=<?= $totalPages . $searchQuery ?>&column=<?= $column ?>&order=<?= $order ?>">
+          <a class="page-link <?= $page == $totalPages ? 'disabled' : '' ?>" href="?page=<?= $totalPages ?><?= $extraQuery ?>&column=<?= $column ?>&order=<?= $order ?>">
             <i class="fa-solid fa-angles-right"></i>
           </a>
         </li>
-
       </ul>
     </nav>
   </div>
