@@ -2,6 +2,7 @@
 // require __DIR__ . "/parts/admin-required.php"; # 需要管理者權限
 require __DIR__ . "/parts/db-connect.php";
 $title = '編輯商品';
+$pageName = 'commodity';
 
 
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;

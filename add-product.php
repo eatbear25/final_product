@@ -3,7 +3,7 @@
 require __DIR__ . "/parts/db-connect.php";
 
 $title = '新增商品';
-$pageName = 'add-product';
+$pageName = 'commodity';
 
 // * 取得產品分類資料
 $category_sql = " SELECT * FROM `product_category` ";

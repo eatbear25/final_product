@@ -1,7 +1,7 @@
 <?php
 require __DIR__ . "/parts/db-connect.php";
 $title = '商品列表';
-$pageName = 'product-list';
+$pageName = 'commodity';
 
 # 用戶要看的頁數
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
